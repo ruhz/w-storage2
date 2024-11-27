@@ -3,6 +3,7 @@ import multer from 'multer'
 import path from 'path'
 import * as fs from 'fs'
 import axios from 'axios'
+import https from 'https';
 
 const app = express();
 
@@ -15,36 +16,6 @@ app.get('/', (req, res) => {
 
 const BACKUP_SERVER_URL = 'http://<另一台服务器的地址>:<端口>'; // 另一个服务器的地址
 
-// 设置上传路径
-const upload = multer({ dest: 'uploads/' });
-
-// 文件上传 API
-app.post('/upload', upload.single('file'), async (req, res) => {
-  const file = req.file;
-  if (!file) {
-    res.status(400).send('No file uploaded.');
-    return
-  }
-
-  const destPath = path.join(__dirname, 'uploads', file.originalname);
-  fs.renameSync(file.path, destPath);
-
-  // 备份到另一台服务器
-  try {
-    const formData = new FormData();
-    formData.append('file', fs.createReadStream(destPath));
-
-    await axios.post(`${BACKUP_SERVER_URL}/upload`, formData, {
-      headers: formData.getHeaders(),
-    });
-    console.log(`File ${file.originalname} backed up to ${BACKUP_SERVER_URL}`);
-  } catch (error) {
-    console.error(`Backup to ${BACKUP_SERVER_URL} failed:`, error.message);
-  }
-
-  res.send('File uploaded and backed up.');
-});
-
 // 文件下载 API
 app.get('/files/:filename', (req, res) => {
   const filePath = path.join(__dirname, 'uploads', req.params.filename);
@@ -56,7 +27,9 @@ app.get('/files/:filename', (req, res) => {
 });
 
 app.get('/sync', async (req, res) => {
-  
+  const url: string = 'https://api.example.com/data';
+  const resp = https.get(url)
+  const data = await resp.json()
 })
 
 export default app
