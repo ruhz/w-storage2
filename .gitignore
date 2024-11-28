@@ -1,2 +1,10 @@
 node_modules/
 dist/
+
+export function wget<T>(surl: string): Promise<T> {
+return new Promise<T>((resolve, rejects) => {
+axios.get<T>(surl)
+.then((r: { data: T | PromiseLike<T> }) => resolve(r.data))
+.catch((r: any) => rejects(r))
+})
+}
